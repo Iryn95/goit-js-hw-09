@@ -22,7 +22,7 @@ img {
 button{
   margin: 0 20px;
   width: 11em;
-  height: 50px;
+  height: 30px;
   background: aquamarine;
   color: #212121;
   text-transform: uppercase;
@@ -43,7 +43,7 @@ button:disabled {
 }
 
 input {
-  height: 50px;
+  height: 30px;
   text-align: center;
   font-size: large;
 }
