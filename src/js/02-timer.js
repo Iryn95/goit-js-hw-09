@@ -1,125 +1,77 @@
+// -----------------IMPORTS-----------------
 
-// Описан в документации
-import flatpickr from 'flatpickr';
-// Дополнительный импорт стилей
-import 'flatpickr/dist/flatpickr.min.css';
-
+import flatpickr from "flatpickr";
+import "flatpickr/dist/flatpickr.min.css";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
+// -----------------EXPORTS-----------------
 
-const refs = {
-    boxEl: document.createElement("div"),
-    pEl: document.querySelector("p"),
-    inputDateTimePicker: document.querySelector("#datetime-picker"),
-    btnStart: document.querySelector('button[data-start]'),
-    divTimer: document.querySelector(".timer"),
-    selectedDate: 0,
-    dateNowGlobal: 0,
-    timerId: "",
-    daysValue: document.querySelector('span.value[data-days]'),
-    hoursValue: document.querySelector('span.value[data-hours]'),
-    minutesValue: document.querySelector('span.value[data-minutes]'),
-    secondsValue: document.querySelector('span.value[data-seconds]'),
-};
-
-
-
-refs.boxEl.className = "boxElement";
-refs.boxEl.style.height = "40vh";
-refs.pEl.after(refs.boxEl);
-refs.boxEl.prepend(refs.inputDateTimePicker, refs.btnStart);
-refs.boxEl.after(refs.divTimer);
-refs.btnStart.setAttribute("disabled", "");
-
-
-// flatpickr options and init
+const bodyRef = document.querySelector("body");
+const startBtn = document.querySelector("button[data-start]");
+const timerRef = document.querySelector(".timer");
 const options = {
-  enableTime: true,
-  time_24hr: true,
-  defaultDate: new Date(),
-  minuteIncrement: 1,
+    enableTime: true,
+    time_24hr: true,
+    defaultDate: new Date(),
+    minuteIncrement: 1,
     onClose(selectedDates) {
-        const dateNow = new Date();
-        refs.selectedDate = selectedDates[0].getTime();
-        console.log(selectedDates[0]);
-        
-      if (selectedDates[0].getTime() >= dateNow.getTime()) {
-          refs.btnStart.removeAttribute("disabled");
-          Notify.success("GOOD!!! CLICK START 🥳🥳🥳")
-      } else {
-          refs.btnStart.setAttribute("disabled", "");
-          Notify.failure('Please choose a date in the future', {
-             
-          });
-        
-      }
+    console.log(selectedDates[0]);
     },
-};
-
-flatpickr(refs.inputDateTimePicker, options);
-
-// start timer
-refs.btnStart.addEventListener("click", () => {
-    
-    refs.btnStart.setAttribute("disabled", "");
-    refs.inputDateTimePicker.setAttribute("disabled", "");
-
-    refs.timerId = setInterval(timerRun, 1000);
-
-});
-
-
-
-function timerRun() {
-
-    refs.dateNowGlobal = new Date();
-    // console.log(refs.dateNowGlobal);
-
-    let deltaTimeMs = refs.selectedDate - refs.dateNowGlobal;
-
-    console.log(deltaTimeMs);
-    let deltaTimeMsObj = convertMs(deltaTimeMs);
-    
-    // adding textContent to html elements days, hours, minutes, seconds
-    const { days, hours, minutes, seconds } = deltaTimeMsObj;
-    
-    refs.daysValue.textContent = addLeadingZero(days);
-    refs.hoursValue.textContent = addLeadingZero(hours);
-    refs.minutesValue.textContent = addLeadingZero(minutes);
-    refs.secondsValue.textContent = addLeadingZero(seconds);
-
-    // check timer deltaTimeMs < 1s
-    if (deltaTimeMs < 1000) {
-        Notify.success('Timer is Over! Good luck!', {
-              clickToClose: true,
-              timeout: 4000,
-              position: 'center-center',
-          });
-        clearInterval(refs.timerId);
     };
+// -----------------INITIALIZATION LIBRARY-----------------
 
-};
+const date = flatpickr("#datetime-picker", options);
 
-function convertMs(ms) {
-  // Number of milliseconds per unit of time
-  const second = 1000;
-  const minute = second * 60;
-  const hour = minute * 60;
-  const day = hour * 24;
+// -----------------FUNCTIONS-----------------
 
-  // Remaining days
-  const days = Math.floor(ms / day);
-  // Remaining hours
-  const hours = Math.floor((ms % day) / hour);
-  // Remaining minutes
-  const minutes = Math.floor(((ms % day) % hour) / minute);
-  // Remaining seconds
-  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
-
-  return { days, hours, minutes, seconds };
-};
+function selectDate () {
+        if(date.latestSelectedDateObj < new Date()) {
+            Notify.failure("Please choose a date in the future")
+            return
+    }
+    else {
+        startBtn.disabled = false;
+        Notify.success("GOOD!!! CLICK START 🥳🥳🥳")
+    }
+}
 function addLeadingZero(value) {
-    if (value < 10) {
-return `${value}`.padStart(2, "0");    
-    } else { return `${value}`};
-};
+    return String(value).padStart(2, "0");
+}
+function getTime () {
+    const distance = date.latestSelectedDateObj - new Date();
+    const days = addLeadingZero(Math.floor(distance / (1000 * 60 * 60 * 24)));
+    const hours = addLeadingZero(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
+    const minutes = addLeadingZero(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)));
+    const seconds = addLeadingZero(Math.floor((distance % (1000 * 60)) / 1000));
+    const countdown = `<div class="field">
+    <span class="value" data-days>${days}</span>
+    <span class="label">Days</span>
+    </div>
+    <div class="field">
+    <span class="value" data-hours>${hours}</span>
+    <span class="label">Hours</span>
+    </div>
+    <div class="field">
+    <span class="value" data-minutes>${minutes}</span>
+    <span class="label">Minutes</span>
+    </div>
+    <div class="field">
+    <span class="value" data-seconds>${seconds}</span>
+    <span class="label">Seconds</span>
+    </div>`;
+    timerRef.innerHTML = countdown;
+}
+function startTimer () {
+    const timer = setInterval(() => {
+        const distance = date.latestSelectedDateObj - new Date();;
+        getTime()
+        if (distance < 0) {
+            clearInterval(timer);
+            Notify.failure("Time's up!🥺🥺🥺");
+        }
+    }, 1000);
+}
+// -----------------EVENT LISTENERS-----------------
+
+bodyRef.addEventListener("input", selectDate)
+startBtn.addEventListener("click", startTimer)
