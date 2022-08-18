@@ -31,6 +31,7 @@ button{
 button:disabled {
   margin: 0 20px;
   background: bisque;
+  
   color:#212121;
 }
 
