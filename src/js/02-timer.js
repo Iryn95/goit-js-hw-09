@@ -1,10 +1,10 @@
-// -----------------IMPORTS-----------------
+
 
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-// -----------------EXPORTS-----------------
+
 
 const bodyRef = document.querySelector("body");
 const startBtn = document.querySelector("button[data-start]");
@@ -18,11 +18,11 @@ const options = {
     console.log(selectedDates[0]);
     },
     };
-// -----------------INITIALIZATION LIBRARY-----------------
+
 
 const date = flatpickr("#datetime-picker", options);
 
-// -----------------FUNCTIONS-----------------
+
 
 function selectDate () {
         if(date.latestSelectedDateObj < new Date()) {
@@ -71,7 +71,7 @@ function startTimer () {
         }
     }, 1000);
 }
-// -----------------EVENT LISTENERS-----------------
+
 
 bodyRef.addEventListener("input", selectDate)
 startBtn.addEventListener("click", startTimer)
