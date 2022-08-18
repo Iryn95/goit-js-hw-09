@@ -68,10 +68,7 @@ refs.btnStart.addEventListener("click", () => {
 
 });
 
-// reset page
-btnReset.addEventListener("click", () => {
-    document.location.reload();
- });
+
 
 function timerRun() {
 
